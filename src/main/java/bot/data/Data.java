@@ -1,25 +1,24 @@
 package bot.data;
 
-import bot.data.api.CryptoDataCollector;
-import bot.data.api.HuobiApiServiceImpl;
+import bot.data.api.HuobiApi;
+import bot.data.api.HuobiCLI;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import java.util.Map;
 import java.util.Deque;
 
 public class Data {
     public Data() {
-        try {
-            HuobiApiServiceImpl huobiApiService = new HuobiApiServiceImpl();
-            CryptoDataCollector collector = new CryptoDataCollector(huobiApiService);
-            Map<String, Map<String, Deque<Price>>> allData = collector.collectData();
+        ObjectMapper om = new ObjectMapper()
+                //this setting is for using JavaTimeModule for converting timestamps to Java time representations
+                .registerModule(new JavaTimeModule());
+        CloseableHttpClient client = HttpClients.createDefault();
 
-            if (allData.isEmpty()) {
-                System.out.println("Данные не были собраны. Проверьте настройки API или фильтры.");
-            } else {
-                System.out.println("Сбор данных завершён. Размер allData: " + allData.size());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        HuobiApi huobiApi = new HuobiApi(client,om);
+        HuobiCLI huobiCLI = new HuobiCLI(huobiApi);
+        huobiCLI.start();
     }
 }
