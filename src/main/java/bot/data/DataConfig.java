@@ -1,5 +1,6 @@
 package bot.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class DataConfig {
     private static int AmountOfCryptocurrency;
     private static int CandlesAmount;
     private static String socketlink;
+    private static List<String> timeframes;
 
 
 
@@ -24,6 +26,9 @@ public class DataConfig {
         timeWindowMillis = 100;
 
         socketlink = "wss://ws.kraken.com/v2";
+
+
+        timeframes = Arrays.asList("60min","4hour");
 
 
         APIlink = "";
@@ -41,6 +46,10 @@ public class DataConfig {
 
 
 
+    }
+
+    public static List<String> getTimeframes() {
+        return timeframes;
     }
 
     public static String getAPIlink() {

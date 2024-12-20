@@ -1,6 +1,6 @@
 package bot.data.api;
 
-import bot.data.api.model.Kline;
+import bot.data.api.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
@@ -12,8 +12,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import bot.data.api.model.ApiResponse;
-import bot.data.api.model.MarketData;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -25,20 +24,23 @@ public class HuobiApi {
     private static final String BASE_URL = "https://api.huobi.pro";
     private final CloseableHttpClient client;
     private final ObjectMapper objectMapper;
+
     public HuobiApi(CloseableHttpClient client, ObjectMapper objectMapper) {
         this.client = client;
         this.objectMapper = objectMapper;
     }
 
     public List<MarketData> marketTickers(Map<String, String> parameters) throws IOException, URISyntaxException {
-        String endpoint =  "/market/tickers";
-        TypeReference<ApiResponse<List<MarketData>>> typeReference = new TypeReference<>() {};
+        String endpoint = "/market/tickers";
+        TypeReference<ApiResponse<List<MarketData>>> typeReference = new TypeReference<>() {
+        };
         return makeAPICall(endpoint, parameters, typeReference);
     }
 
-    public  List<Kline> getKlines(Map<String, String> parameters) throws IOException, URISyntaxException {
-        String endpoint =  "/market/history/kline";
-        TypeReference<ApiResponse<List<Kline>>> typeReference = new TypeReference<>() {};
+    public List<Kline> getKlines(Map<String, String> parameters) throws IOException, URISyntaxException {
+        String endpoint = "/market/history/kline";
+        TypeReference<ApiResponse<List<Kline>>> typeReference = new TypeReference<>() {
+        };
         return makeAPICall(endpoint, parameters, typeReference);
     }
 
@@ -64,10 +66,13 @@ public class HuobiApi {
             responseContent = EntityUtils.toString(entity);
             EntityUtils.consume(entity); // Ensure the entity content is fully consumed
             //if type reference is provided then we use it otherwise we create a default one
-            TypeReference<ApiResponse<T>> tr = typeReference != null ? typeReference : new TypeReference<>() {};
+            TypeReference<ApiResponse<T>> tr = typeReference != null ? typeReference : new TypeReference<>() {
+            };
             // Deserialize and return response content as T
             ApiResponse<T> apiResponse = objectMapper.readValue(responseContent, tr);
             return apiResponse.data();
         }
+
+
     }
 }

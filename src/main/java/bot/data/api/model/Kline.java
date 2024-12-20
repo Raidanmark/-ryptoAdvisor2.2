@@ -1,5 +1,7 @@
 package bot.data.api.model;
 
+
+
 public record Kline(
         double id,
         double amount,
