@@ -41,7 +41,7 @@ public class DataConfig {
                 "wss://ws.kraken.com/v2"
         );
 
-        AmountOfCryptocurrency = 5;
+        AmountOfCryptocurrency = 3;
         CandlesAmount = 3;
 
 

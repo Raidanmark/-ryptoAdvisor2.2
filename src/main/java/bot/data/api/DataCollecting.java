@@ -8,21 +8,24 @@ import bot.data.DataConfig;
 import bot.data.api.model.DOTMarketData;
 import bot.data.api.model.Kline;
 import bot.data.api.model.MarketData;
-import bot.data.api.HuobiApi;
-import bot.data.api.model.Ticker;
+import bot.data.Ticker;
+import bot.data.websocket.HuobiApiWebsocket;
 
 import java.util.stream.Collectors;
 
 public class DataCollecting {
     HuobiApi huobiApi;
     DataConfig dataConfig = new DataConfig();
+    HuobiApiWebsocket huobiApiWebsocket;
+
 
     public DataCollecting(HuobiApi huobiApi) {
+
         this.huobiApi = huobiApi;
     }
 
 
-    public void start() {
+    public List<Ticker> start() {
         List<Ticker>  allData = new ArrayList<>();
         List<DOTMarketData> volData = new ArrayList<>();
 // Получение тикеров
@@ -40,6 +43,8 @@ public class DataCollecting {
 
 
 
+
+
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -53,6 +58,7 @@ public class DataCollecting {
         //(тут) вызов метода для получения и (в коллектинг)заполнения данных по всем тикерам
 
         //
+        return allData;
 
     }
 
@@ -90,7 +96,7 @@ public class DataCollecting {
                  parameters.put("size", candlesamount);
                  parameters.put("symbol", ticker.symbol());
 
-                 try{
+                 try {
                      var allkliens = huobiApi.getKlines(parameters);
                      closePrices = allkliens.stream()
                              .map(Kline::close)
@@ -104,14 +110,23 @@ public class DataCollecting {
 
                  parameters.clear();
 
-                 // Создаём Ticker с этими значениями
+                 huobiApiWebsocket = new HuobiApiWebsocket();
 
 
+                 try {
+                     var websocketupdate = huobiApiWebsocket.updateCandlestick(ticker.symbol(), timeframe);
+                     System.out.println(websocketupdate);
 
+                 } catch (RuntimeException e){
+
+                     System.err.println("Ошибка при выполнении updateCandlestick: " + e.getMessage());
+                     e.printStackTrace();
+                 }
              }
+
+
          }
 
          return allTickers;
-    }
-
+     }
 }
