@@ -1,8 +1,6 @@
 package bot.data;
 
-import bot.data.api.DataCollecting;
-import bot.data.api.HuobiApi;
-
+import bot.data.model.Ticker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.http.impl.client.CloseableHttpClient;

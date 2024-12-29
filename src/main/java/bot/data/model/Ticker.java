@@ -1,4 +1,4 @@
-package bot.data;
+package bot.data.model;
 
 import java.util.List;
 

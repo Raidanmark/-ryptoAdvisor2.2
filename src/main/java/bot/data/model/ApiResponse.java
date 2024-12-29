@@ -1,4 +1,4 @@
-package bot.data.api.model;
+package bot.data.model;
 
 
 public record ApiResponse<T> (

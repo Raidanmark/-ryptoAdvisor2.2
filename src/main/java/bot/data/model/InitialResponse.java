@@ -1,4 +1,4 @@
-package bot.data.websocket.model;
+package bot.data.model;
 
 public record InitialResponse(
  String id,

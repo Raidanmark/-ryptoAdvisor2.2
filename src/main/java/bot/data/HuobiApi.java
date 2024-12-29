@@ -1,6 +1,8 @@
-package bot.data.api;
+package bot.data;
 
-import bot.data.api.model.*;
+import bot.data.model.ApiResponse;
+import bot.data.model.Kline;
+import bot.data.model.MarketData;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;

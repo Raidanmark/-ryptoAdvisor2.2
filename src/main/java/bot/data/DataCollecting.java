@@ -1,15 +1,13 @@
-package bot.data.api;
+package bot.data;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import bot.data.DataConfig;
-import bot.data.api.model.DOTMarketData;
-import bot.data.api.model.Kline;
-import bot.data.api.model.MarketData;
-import bot.data.Ticker;
-import bot.data.websocket.HuobiApiWebsocket;
+import bot.data.model.DOTMarketData;
+import bot.data.model.Kline;
+import bot.data.model.MarketData;
+import bot.data.model.Ticker;
 
 import java.util.stream.Collectors;
 

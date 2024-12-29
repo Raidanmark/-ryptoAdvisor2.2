@@ -1,6 +1,4 @@
-package bot.data.websocket;
-
-import java.time.Instant;
+package bot.data;
 
 public class CandleFilter {
 

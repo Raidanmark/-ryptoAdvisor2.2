@@ -28,7 +28,7 @@ public class DataConfig {
         socketlink = "wss://ws.kraken.com/v2";
 
 
-        timeframes = Arrays.asList("60min","4hour");
+        timeframes = Arrays.asList("15min","4hour");
 
 
         APIlink = "";

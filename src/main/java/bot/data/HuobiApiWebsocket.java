@@ -1,17 +1,12 @@
-package bot.data.websocket;
+package bot.data;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huobi.client.MarketClient;
-import com.huobi.client.req.market.CandlestickRequest;
 import com.huobi.client.req.market.SubCandlestickRequest;
 import com.huobi.constant.HuobiOptions;
 import com.huobi.constant.enums.CandlestickIntervalEnum;
-import com.huobi.model.market.Candlestick;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 
 import java.util.Arrays;
-import java.util.List;
 
 public class HuobiApiWebsocket {
 
@@ -41,6 +36,14 @@ marketClient.subCandlestick(SubCandlestickRequest.builder()
     } else {
         System.out.println("Незавершённая свеча (обновление): " + candlestick.toString());
     }
+    //Нужен метод для обработки времени когда пришел отклик от веб сокета
+    //В нем тянем последние данные из бд ( он должны быть записаны уже в какуб то пременнуб для сравнения
+    //и обновляться после записи подходящего для бд данных)
+    //и затем сравниваем с веременем что пришло
+    //Если подходит по таймфрейму то после переезаписи вызываем наши аналитические методы
+    //для данного тикера и таймфрейма
+    //от них выводим в бота результат
+    //Добавляем необходимые комманды для управления ботом ивозможнростью выбора тикеров и таймфреймов и мб даже методов
     });
     return null;
     }
