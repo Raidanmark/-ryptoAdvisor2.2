@@ -24,7 +24,7 @@ public class DataCollecting {
 
 
     public List<Ticker> start() {
-        List<Ticker>  allData = new ArrayList<>();
+        List<Ticker> allTickers = new ArrayList<>();
         List<DOTMarketData> volData = new ArrayList<>();
 // Получение тикеров
         try {
@@ -36,8 +36,8 @@ public class DataCollecting {
             volData = keepTop(volData,dataConfig.getAmountOfCryptocurrency());
             System.out.println(volData);
 
-            allData = getCandles(volData, dataConfig.getTimeframes(),dataConfig.getAmountOfCryptocurrency());
-            System.out.println(allData);
+            allTickers = getCandles(volData, dataConfig.getTimeframes(),dataConfig.getAmountOfCryptocurrency());
+            System.out.println(allTickers);
 
 
 
@@ -56,7 +56,7 @@ public class DataCollecting {
         //(тут) вызов метода для получения и (в коллектинг)заполнения данных по всем тикерам
 
         //
-        return allData;
+        return allTickers;
 
     }
 

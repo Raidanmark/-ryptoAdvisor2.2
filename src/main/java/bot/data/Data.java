@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Data {
-    private List<Ticker> allData = new ArrayList<>();
+    private final List<Ticker> allTickers = new ArrayList<>();
 
     public Data() {
         ObjectMapper om = new ObjectMapper()
@@ -18,21 +18,18 @@ public class Data {
                 .registerModule(new JavaTimeModule());
         CloseableHttpClient client = HttpClients.createDefault();
 
-        HuobiApi huobiApi = new HuobiApi(client,om);
+        HuobiApi huobiApi = new HuobiApi(client, om);
         DataCollecting dataCollecting = new DataCollecting(huobiApi);
-        allData = dataCollecting.start();
+
+        // Инициализируем тикеры
+        List<Ticker> initialTickers = dataCollecting.start();
+        synchronized (allTickers) {
+            allTickers.addAll(initialTickers);
+        }
+        System.out.println("Инициализация завершена. Загруженные тикеры: " + allTickers);
 
 
-    }
 
-
-
-    public  List<Ticker> getAllData() {
-        return allData;
-    }
-
-    public void setAllData(List<Ticker> allData) {
-        this.allData = allData;
     }
 
 
