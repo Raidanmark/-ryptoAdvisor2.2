@@ -19,7 +19,8 @@ public class Data {
         CloseableHttpClient client = HttpClients.createDefault();
 
         HuobiApi huobiApi = new HuobiApi(client, om);
-        DataCollecting dataCollecting = new DataCollecting(huobiApi);
+        HuobiApiWebsocket huobiApiWebsocket = new HuobiApiWebsocket(om);
+        DataCollecting dataCollecting = new DataCollecting(huobiApi,huobiApiWebsocket);
 
         // Инициализируем тикеры
         List<Ticker> initialTickers = dataCollecting.start();

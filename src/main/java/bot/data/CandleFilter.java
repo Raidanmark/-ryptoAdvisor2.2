@@ -23,7 +23,7 @@ public class CandleFilter {
                 return 15 * 60 * 1000L; // 15 минут
             case "30min":
                 return 30 * 60 * 1000L; // 30 минут
-            case "1hour":
+            case "60min":
                 return 60 * 60 * 1000L; // 1 час
             case "4hour":
                 return 4 * 60 * 60 * 1000L; // 4 часа

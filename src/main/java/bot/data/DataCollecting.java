@@ -8,6 +8,7 @@ import bot.data.model.DOTMarketData;
 import bot.data.model.Kline;
 import bot.data.model.MarketData;
 import bot.data.model.Ticker;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.stream.Collectors;
 
@@ -17,9 +18,10 @@ public class DataCollecting {
     HuobiApiWebsocket huobiApiWebsocket;
 
 
-    public DataCollecting(HuobiApi huobiApi) {
+    public DataCollecting(HuobiApi huobiApi, HuobiApiWebsocket huobiApiWebsocket) {
 
         this.huobiApi = huobiApi;
+        this.huobiApiWebsocket = huobiApiWebsocket;
     }
 
 
@@ -79,7 +81,7 @@ public class DataCollecting {
         return tickersVol;
     }
 
-     private  List<Ticker> getCandles(List<DOTMarketData> tickers, List<String> timeframes, int candles) {
+    private  List<Ticker> getCandles(List<DOTMarketData> tickers, List<String> timeframes, int candles) {
          List<Ticker> allTickers = new ArrayList<>();
          Map<String, String> parameters = new HashMap<>();
          List<Double> closePrices = new ArrayList<>();
@@ -108,7 +110,6 @@ public class DataCollecting {
 
                  parameters.clear();
 
-                 huobiApiWebsocket = new HuobiApiWebsocket();
 
 
                  try {
@@ -126,5 +127,10 @@ public class DataCollecting {
          }
 
          return allTickers;
-     }
+    }
+
+    private void handleNewCandlestick() {
+
+    }
+
 }
