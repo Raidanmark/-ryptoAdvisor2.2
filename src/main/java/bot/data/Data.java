@@ -11,8 +11,10 @@ import java.util.List;
 
 public class Data {
     private final List<Ticker> allTickers = new ArrayList<>();
+     Data data;
 
     public Data() {
+        this.data = this;
         ObjectMapper om = new ObjectMapper()
                 //this setting is for using JavaTimeModule for converting timestamps to Java time representations
                 .registerModule(new JavaTimeModule());
@@ -20,7 +22,7 @@ public class Data {
 
         HuobiApi huobiApi = new HuobiApi(client, om);
         HuobiApiWebsocket huobiApiWebsocket = new HuobiApiWebsocket(om);
-        DataCollecting dataCollecting = new DataCollecting(huobiApi,huobiApiWebsocket);
+        DataCollecting dataCollecting = new DataCollecting(huobiApi,huobiApiWebsocket, data);
 
         // Инициализируем тикеры
         List<Ticker> initialTickers = dataCollecting.start();
@@ -32,6 +34,32 @@ public class Data {
 
 
     }
+
+    public Ticker findTicker(String symbol, String timeframe) {
+        synchronized (allTickers) {
+            for (Ticker ticker : allTickers) {
+                if (ticker.symbol().equals(symbol) && ticker.timeframe().equals(timeframe)) {
+                    return ticker; // Возвращаем найденный тикер
+                }
+            }
+        }
+        return null; // Если тикер не найден
+    }
+
+    public void updateTicker(Ticker updatedTicker) {
+        synchronized (allTickers) {
+            for (int i = 0; i < allTickers.size(); i++) {
+                Ticker existingTicker = allTickers.get(i);
+                if (existingTicker.symbol().equals(updatedTicker.symbol()) &&
+                        existingTicker.timeframe().equals(updatedTicker.timeframe())) {
+                    allTickers.set(i, updatedTicker); // Заменяем старый тикер на новый
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("Ticker not found: " + updatedTicker.symbol() + " " + updatedTicker.timeframe());
+        }
+    }
+
 
 
 }

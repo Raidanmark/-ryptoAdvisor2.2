@@ -2,18 +2,8 @@ package bot.data;
 
 public class CandleFilter {
 
-    public static boolean isCandleFinal(long candlestickTimestamp, String interval) {
-        // Текущее время
-        long currentTime = System.currentTimeMillis();
 
-        // Длительность таймфрейма в миллисекундах
-        long intervalDuration = getIntervalDuration(interval);
-
-        // Свеча завершена, если разница между текущим временем и временной меткой >= длительности интервала
-        return currentTime >= candlestickTimestamp + intervalDuration;
-    }
-
-    private static long getIntervalDuration(String interval) {
+    public static long getIntervalDuration(String interval) {
         switch (interval.toLowerCase()) {
             case "1min":
                 return 60 * 1000L; // 1 минута

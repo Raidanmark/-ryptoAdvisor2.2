@@ -1,9 +1,19 @@
 package bot.data.model;
 
-import java.util.List;
+import java.util.LinkedList;
+
 
 public record Ticker (
    String symbol,
    String timeframe,
-   List<Double> close
-) {}
+   LinkedList<Double> close,
+   long lastTimestamp // Хранит последний таймстамп обновления
+) {
+    public void addClosePrice(double newPrice, int maxSize) {
+        if (close.size() >= maxSize) {
+            close.removeFirst(); // Удаляем самое старое значение
+        }
+        close.addLast(newPrice); // Добавляем новое значение в конец
+    }
+}
+
