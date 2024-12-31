@@ -49,5 +49,12 @@ public class BotListener extends ListenerAdapter {
     private ChatBotSession getOrCreateSession(String chatId, MessageSender messageSender) {
         return chatSessions.computeIfAbsent(chatId, id -> new ChatBotSession(messageSender));
     }
+    public void broadcastMessage(String message) {
+        chatSessions.values().forEach(session -> {
+            if ("ACTIVE".equals(session.getCurrentStatus().getName())) {
+                session.getMessageSender().sendMessage(message);
+            }
+        });
+    }
 
 }

@@ -1,9 +1,9 @@
 package bot;
 
+import bot.analytics.SMA;
 import bot.chatbot.BotCore;
 import bot.chatbot.Config;
 import bot.data.Data;
-import bot.data.DataConfig;
 
 
 public class Main {
@@ -11,10 +11,13 @@ public class Main {
         String token = "";
 
 
-        Data data = new Data();
+
         Config config = new Config();
         token = config.getDiscordToken();
         BotCore botCore = new BotCore(token);
+        Data data = new Data(botCore);
+
+
 
 
 

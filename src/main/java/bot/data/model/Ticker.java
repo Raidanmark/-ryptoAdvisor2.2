@@ -7,7 +7,10 @@ public record Ticker (
    String symbol,
    String timeframe,
    LinkedList<Double> close,
-   long lastTimestamp // Хранит последний таймстамп обновления
+   long lastTimestamp,// Хранит последний таймстамп обновления
+   boolean SMAsignal,
+   boolean MACDsignal
+
 ) {
     public void addClosePrice(double newPrice, int maxSize) {
         if (close.size() >= maxSize) {

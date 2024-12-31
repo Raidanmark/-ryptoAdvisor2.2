@@ -16,7 +16,9 @@ public class DataConfig {
     private static int CandlesAmount;
     private static String socketlink;
     private static List<String> timeframes;
-
+    private static int macdShortPeriod;
+    private static int macdLongPeriod;
+    private static int macdSignalPeriod;
 
 
     public DataConfig() {
@@ -28,7 +30,7 @@ public class DataConfig {
         socketlink = "wss://ws.kraken.com/v2";
 
 
-        timeframes = Arrays.asList("60min","4hour");
+        timeframes = Arrays.asList("5min","4hour");
 
 
         APIlink = "";
@@ -42,8 +44,11 @@ public class DataConfig {
         );
 
         AmountOfCryptocurrency = 3;
-        CandlesAmount = 3;
+        CandlesAmount = 40;
 
+        macdShortPeriod = 12;
+        macdLongPeriod = 26;
+        macdSignalPeriod = 9;
 
 
     }
@@ -83,5 +88,14 @@ public class DataConfig {
     }
     public static String getSocketlink() {
         return socketlink;
+    }
+    public static int getMacdShortPeriod() {
+        return macdShortPeriod;
+    }
+    public static int getMacdLongPeriod() {
+        return macdLongPeriod;
+    }
+    public static int getMacdSignalPeriod() {
+        return macdSignalPeriod;
     }
 }

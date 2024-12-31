@@ -1,5 +1,9 @@
 package bot.data;
 
+import bot.analytics.MACD;
+import bot.analytics.SMA;
+import bot.chatbot.BotCore;
+import bot.chatbot.BotListener;
 import bot.data.model.Ticker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -11,10 +15,19 @@ import java.util.List;
 
 public class Data {
     private final List<Ticker> allTickers = new ArrayList<>();
-     Data data;
+    Data data;
+    SMA sma;
+    MACD macd;
+    BotCore botCore;
 
-    public Data() {
+
+
+    public Data(BotCore botCore) {
         this.data = this;
+        this.botCore = botCore;
+        this.sma = new SMA(data, botCore.getBotListener());
+        this.macd = new MACD(data, botCore.getBotListener());
+
         ObjectMapper om = new ObjectMapper()
                 //this setting is for using JavaTimeModule for converting timestamps to Java time representations
                 .registerModule(new JavaTimeModule());
@@ -30,9 +43,13 @@ public class Data {
             allTickers.addAll(initialTickers);
         }
         System.out.println("Инициализация завершена. Загруженные тикеры: " + allTickers);
+        analizeLoadedTickers();
+    }
 
 
 
+    public synchronized List<Ticker> getAllTickers() {
+        return new ArrayList<>(allTickers); // Возвращаем копию списка для избежания модификации оригинала
     }
 
     public Ticker findTicker(String symbol, String timeframe) {
@@ -46,19 +63,46 @@ public class Data {
         return null; // Если тикер не найден
     }
 
+    public void analizeLoadedTickers() {
+        synchronized (data.getAllTickers()) {
+            for (Ticker ticker : data.getAllTickers()) {
+                // Анализируем SMA
+                runAnalyticsForTicker(ticker);
+            }
+        }
+    }
+
     public void updateTicker(Ticker updatedTicker) {
         synchronized (allTickers) {
             for (int i = 0; i < allTickers.size(); i++) {
                 Ticker existingTicker = allTickers.get(i);
                 if (existingTicker.symbol().equals(updatedTicker.symbol()) &&
                         existingTicker.timeframe().equals(updatedTicker.timeframe())) {
-                    allTickers.set(i, updatedTicker); // Заменяем старый тикер на новый
+                    // Заменяем старый тикер на новый
+                    allTickers.set(i, updatedTicker);
+
+                    // Проводим анализы для обновленного тикера
+                    runAnalyticsForTicker(updatedTicker);
+
                     return;
                 }
             }
             throw new IllegalArgumentException("Ticker not found: " + updatedTicker.symbol() + " " + updatedTicker.timeframe());
         }
     }
+
+    public void runAnalyticsForTicker(Ticker ticker) {
+        // Анализ SMA
+
+
+        sma.analyzeSMASignal(ticker);
+
+
+        // Анализ MACD
+        macd.analyzeMACDSignal(ticker);
+       ;
+    }
+
 
 
 

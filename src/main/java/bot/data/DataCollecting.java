@@ -105,7 +105,7 @@ public class DataCollecting {
                              .map(Kline::close)
                              .collect(Collectors.toList()));
 
-                     allTickers.add(new Ticker(ticker.symbol(), timeframe, closePrices, lastTimestamp));
+                     allTickers.add(new Ticker(ticker.symbol(), timeframe, closePrices, lastTimestamp, false, false));
 
                  } catch (IOException | URISyntaxException e) {
                      throw new RuntimeException(e);
@@ -155,7 +155,14 @@ public class DataCollecting {
                 ticker.addClosePrice(kline.close(), dataConfig.getCandlesAmount());
 
                 // Обновление lastTimestamp в секундах
-                Ticker updatedTicker = new Ticker(symbol, timeframe, ticker.close(), ts / 1000);
+                Ticker updatedTicker = new Ticker(
+                        symbol,
+                        timeframe,
+                        ticker.close(),
+                        ts / 1000,
+                        ticker.SMAsignal(),
+                        ticker.MACDsignal()
+                        );
                 data.updateTicker(updatedTicker);
 
                 System.out.println("Данные тикера обновлены: " + symbol + " (" + timeframe + ")");

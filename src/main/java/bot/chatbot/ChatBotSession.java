@@ -51,5 +51,13 @@ public class ChatBotSession {
         return commandText.startsWith("!");
     }
 
+    public Status getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public MessageSender getMessageSender() {
+        return messageSender;
+    }
+
 
 }
