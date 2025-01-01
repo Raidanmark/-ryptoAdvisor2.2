@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 public class HuobiApi {
-    // Good practice to define constants
     private static final String APPLICATION_JSON = "application/json";
     private static final String BASE_URL = "https://api.huobi.pro";
     private final CloseableHttpClient client;

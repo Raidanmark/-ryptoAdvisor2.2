@@ -3,7 +3,6 @@ package bot.data;
 import bot.analytics.MACD;
 import bot.analytics.SMA;
 import bot.chatbot.BotCore;
-import bot.chatbot.BotListener;
 import bot.data.model.Ticker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,8 +18,6 @@ public class Data {
     SMA sma;
     MACD macd;
     BotCore botCore;
-
-
 
     public Data(BotCore botCore) {
         this.data = this;
@@ -45,8 +42,6 @@ public class Data {
         System.out.println("Инициализация завершена. Загруженные тикеры: " + allTickers);
         analizeLoadedTickers();
     }
-
-
 
     public synchronized List<Ticker> getAllTickers() {
         return new ArrayList<>(allTickers); // Возвращаем копию списка для избежания модификации оригинала
@@ -93,17 +88,9 @@ public class Data {
 
     public void runAnalyticsForTicker(Ticker ticker) {
         // Анализ SMA
-
-
         sma.analyzeSMASignal(ticker);
-
-
         // Анализ MACD
         macd.analyzeMACDSignal(ticker);
-       ;
+
     }
-
-
-
-
 }

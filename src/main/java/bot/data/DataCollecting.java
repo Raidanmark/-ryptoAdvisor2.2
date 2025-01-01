@@ -3,11 +3,9 @@ package bot.data;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import bot.data.model.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.stream.Collectors;
 
 public class DataCollecting {
     HuobiApi huobiApi;
@@ -17,15 +15,12 @@ public class DataCollecting {
     Data data;
     CandleFilter candleFilter;
 
-
     public DataCollecting(HuobiApi huobiApi, HuobiApiWebsocket huobiApiWebsocket, Data data) {
-
         this.dataCollecting = this;
         this.huobiApi = huobiApi;
         this.huobiApiWebsocket = huobiApiWebsocket;
         this.data = data;
     }
-
 
     public List<Ticker> start() {
         List<Ticker> allTickers = new ArrayList<>();
@@ -42,10 +37,6 @@ public class DataCollecting {
 
             allTickers = getCandles(volData, dataConfig.getTimeframes(),dataConfig.getAmountOfCryptocurrency());
             System.out.println(allTickers);
-
-
-
-
 
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
@@ -70,7 +61,6 @@ public class DataCollecting {
         }
         return tickers;
     }
-
 
     private List<DOTMarketData> pullVol(List<MarketData> tickers) {
 
@@ -113,8 +103,6 @@ public class DataCollecting {
 
                  parameters.clear();
 
-
-
                  try {
                      var websocketupdate = huobiApiWebsocket.updateCandlestick(ticker.symbol(), timeframe, dataCollecting);
                      System.out.println(websocketupdate);
@@ -125,10 +113,7 @@ public class DataCollecting {
                      e.printStackTrace();
                  }
              }
-
-
          }
-
          return allTickers;
     }
 
@@ -173,8 +158,4 @@ public class DataCollecting {
             System.err.println("Тикер не найден для символа: " + symbol + " и таймфрейма: " + timeframe);
         }
     }
-
-
-
-
 }

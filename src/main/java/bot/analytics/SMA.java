@@ -19,7 +19,6 @@ public class SMA {
         // Получаем список значений закрытия из тикера
         List<Double> closePrices = ticker.close();
 
-
         // Рассчитаем текущее SMA
         double currentSMA = calculateSMA(closePrices);
 

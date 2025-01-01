@@ -9,7 +9,7 @@ public class BotCore {
     private final BotListener botListener;
 
     public BotCore(String token) {
-        BotListener tempListener = null; // Временная переменная
+        BotListener tempListener = null;
         try {
             jda = JDABuilder.createDefault(token)
                     .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
