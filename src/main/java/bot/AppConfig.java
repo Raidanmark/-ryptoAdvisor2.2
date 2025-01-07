@@ -1,11 +1,10 @@
 package bot;
 
+import bot.analytics.TickerAnalyzer;
 import bot.chatbot.BotCore;
 import bot.chatbot.BotListener;
 import bot.chatbot.Config;
-import bot.data.Data;
-import bot.data.HuobiApi;
-import bot.data.HuobiApiWebsocket;
+import bot.data.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.dv8tion.jda.api.JDA;
@@ -45,8 +44,12 @@ public class AppConfig {
         }
     }
 
-    public Data createData(){
-        return new Data();
+    private TickerAnalyzer createTickerAnalyzer(){
+        return new TickerAnalyzer();
+    }
+
+    public Data createData(TickerRepository tickerRepository, DataCollecting dataCollecting){
+        return new Data(tickerRepository, createTickerAnalyzer(), dataCollecting);
     }
 
     private ObjectMapper createObjectMapper(){
@@ -58,11 +61,20 @@ public class AppConfig {
         return client;
     }
 
-    public HuobiApi createHuobiApi(){
-        return  new HuobiApi(createHttpClient(), createObjectMapper());
+    private CandleFilter createCandleFilter(){
+        return new CandleFilter();
+    }
+    public static TickerRepository createTickerRepository() {
+        return new TickerRepository();
     }
 
-    public HuobiApiWebsocket createHuobiApiWebsocket(){
-        return new HuobiApiWebsocket(createObjectMapper());
+    private DataConfig createDataConfig(){
+        return new DataConfig();
+    }
+
+    public DataCollecting createDataCollecting(TickerRepository tickerRepository) {
+        HuobiApi huobiApi = new HuobiApi(createHttpClient(), createObjectMapper());
+        HuobiApiWebsocket huobiApiWebsocket =  new HuobiApiWebsocket(createObjectMapper());
+        return new DataCollecting(huobiApi, huobiApiWebsocket, tickerRepository, createDataConfig(), createCandleFilter());
     }
 }

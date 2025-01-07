@@ -1,16 +1,14 @@
 package bot.data;
 
-import bot.analytics.MACD;
-import bot.analytics.SMA;
+
 import bot.analytics.TickerAnalyzer;
-import bot.chatbot.BotCore;
 import bot.data.model.Ticker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class Data {
@@ -18,21 +16,15 @@ public class Data {
     private final TickerRepository tickerRepository;
     private final DataCollecting dataCollecting;
 
-    public Data() {
-        this.tickerRepository  = new TickerRepository();
-        this.tickerAnalyzer = new TickerAnalyzer();
-        this.dataCollecting = new DataCollecting();
+    public Data(TickerRepository tickerRepository, TickerAnalyzer tickerAnalyzer, DataCollecting dataCollecting) {
+        this.tickerRepository  = tickerRepository;
+        this.tickerAnalyzer = tickerAnalyzer;
+        this.dataCollecting = dataCollecting;
 
         Start();
     }
 
     public void Start(){
-        ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
-        CloseableHttpClient client = HttpClients.createDefault();
-
-        HuobiApi huobiApi = new HuobiApi(client, om);
-        HuobiApiWebsocket huobiApiWebsocket = new HuobiApiWebsocket(om);
-        DataCollecting dataCollecting = new DataCollecting(huobiApi,huobiApiWebsocket, data);
 
         List<Ticker> initialTickers = dataCollecting.start();
         initializeTickers(initialTickers);
