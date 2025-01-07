@@ -6,16 +6,17 @@ import bot.data.model.Ticker;
 
 import java.util.List;
 
-public class SMA {
-     Data data;
-     BotListener listener;
+public class SMA implements Analyzer{
+     private final Data data;
+     private final BotListener listener;
 
     public SMA(Data data, BotListener listener) {
         this.data = data;
         this.listener = listener;
     }
 
-    public void analyzeSMASignal(Ticker ticker) {
+    @Override
+    public void analyze(Ticker ticker) {
         // Получаем список значений закрытия из тикера
         List<Double> closePrices = ticker.close();
 
@@ -41,7 +42,7 @@ public class SMA {
                 );
                 data.updateTicker(updatedTicker);
 
-                messageTest();
+
 
             } else { }
         } else {
@@ -69,9 +70,5 @@ public class SMA {
             sum += price;
         }
         return sum / prices.size(); // Возвращаем среднее значение
-    }
-
-    public void messageTest() {
-        listener.broadcastMessage("Тest SMA signal: BUY");
     }
 }

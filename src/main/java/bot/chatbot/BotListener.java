@@ -9,52 +9,54 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class BotListener extends ListenerAdapter {
     private final Map<String, ChatBotSession> chatSessions = new HashMap<>();
-    private final JDA jda;
-
-    public BotListener(JDA jda) {
-        this.jda = jda;
-    }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (isBotMessage(event)) {
+        if (event.getAuthor().isBot()) {
             return;
         }
 
-        String chatId = extractChatId(event);
-        String message = extractMessageContent(event);
-        MessageSender messageSender = createMessageSender(event);
-        ChatBotSession session = getOrCreateSession(chatId, messageSender);
-        session.processCommand(message);
+        String chatId = event.getChannel().getId();
+        String message = event.getMessage().getContentRaw();
+
+        log("[Message Received] Chat ID: " + chatId + ", Message: " + message);
+
+        try {
+            MessageSender messageSender = new JDAMessageSender(event.getChannel());
+            ChatBotSession session = chatSessions.computeIfAbsent(chatId, id -> {
+                log("[New Session] Creating session for chat ID: " + chatId);
+                return new ChatBotSession(messageSender);
+            });
+
+            session.processCommand(message);
+        } catch (Exception e) {
+            logError("Error processing message: " + message, e);
+        }
     }
 
-    private boolean isBotMessage(MessageReceivedEvent event) {
-        return event.getAuthor().isBot();
-    }
-
-    private String extractChatId(MessageReceivedEvent event) {
-        return event.getChannel().getId();
-    }
-
-    private String extractMessageContent(MessageReceivedEvent event) {
-        return event.getMessage().getContentRaw();
-    }
-
-    private MessageSender createMessageSender(MessageReceivedEvent event) {
-        return new JDAMessageSender(event.getChannel());
-    }
-
-    private ChatBotSession getOrCreateSession(String chatId, MessageSender messageSender) {
-        return chatSessions.computeIfAbsent(chatId, id -> new ChatBotSession(messageSender));
-    }
     public void broadcastMessage(String message) {
         chatSessions.values().forEach(session -> {
             if ("ACTIVE".equals(session.getCurrentStatus().getName())) {
-                session.getMessageSender().sendMessage(message);
+                try {
+                    session.getMessageSender().sendMessage(message);
+                    log("[Broadcast] Message sent: " + message);
+                } catch (Exception e) {
+                    logError("Failed to send broadcast message: " + message, e);
+                }
             }
         });
+    }
+
+    private void log(String message) {
+        System.out.println("[BotListener] " + message);
+    }
+
+    private void logError(String message, Throwable e) {
+        System.err.println("[BotListener] " + message);
+        e.printStackTrace();
     }
 
 }

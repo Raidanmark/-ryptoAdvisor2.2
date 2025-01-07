@@ -8,154 +8,124 @@ import java.util.stream.Collectors;
 import bot.data.model.*;
 
 public class DataCollecting {
-    HuobiApi huobiApi;
-    DataConfig dataConfig = new DataConfig();
-    HuobiApiWebsocket huobiApiWebsocket;
-    DataCollecting dataCollecting;
-    Data data;
-    CandleFilter candleFilter;
+    private final HuobiApi huobiApi;
+    private final HuobiApiWebsocket huobiApiWebsocket;
+    private final TickerRepository tickerRepository;
+    private final DataConfig dataConfig;
+    private final CandleFilter candleFilter;
 
-    public DataCollecting(HuobiApi huobiApi, HuobiApiWebsocket huobiApiWebsocket, Data data) {
-        this.dataCollecting = this;
+    public DataCollecting(HuobiApi huobiApi, HuobiApiWebsocket huobiApiWebsocket, TickerRepository tickerRepository, DataConfig dataConfig, CandleFilter candleFilter) {
         this.huobiApi = huobiApi;
         this.huobiApiWebsocket = huobiApiWebsocket;
-        this.data = data;
+        this.tickerRepository = tickerRepository;
+        this.dataConfig = dataConfig;
+        this.candleFilter = candleFilter;
     }
 
     public List<Ticker> start() {
-        List<Ticker> allTickers = new ArrayList<>();
-        List<DOTMarketData> volData = new ArrayList<>();
+
 // Получение тикеров
         try {
+// 1. Получение списка всех тикеров с биржи
             var tickers = huobiApi.marketTickers(Collections.emptyMap());
-           // System.out.println(tickers);
-            volData = pullVol(tickers);
-             System.out.println(volData);
-            Collections.sort(volData, Comparator.comparingDouble(DOTMarketData::vol).reversed());
-            volData = keepTop(volData,dataConfig.getAmountOfCryptocurrency());
-            System.out.println(volData);
+            List<DOTMarketData> volData = pullVol(tickers);
 
-            allTickers = getCandles(volData, dataConfig.getTimeframes(),dataConfig.getAmountOfCryptocurrency());
-            System.out.println(allTickers);
+            // 2. Сортировка тикеров по объёму
+            volData.sort(Comparator.comparingDouble(DOTMarketData::vol).reversed());
+
+            // 3. Ограничение списка тикеров до N из конфигурации
+            volData = keepTop(volData, dataConfig.getAmountOfCryptocurrency());
+
+            // 4. Генерация данных свечей для тикеров по каждому таймфрейму
+            List<Ticker> allTickers = getCandles(volData, dataConfig.getTimeframes(), dataConfig.getCandlesAmount());
+
+            // 5. Возвращаем итоговый список тикеров
+            return allTickers;
 
         } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
+            // Логируем ошибку и выбрасываем исключение
+            throw new RuntimeException("Ошибка получения данных о тикерах", e);
         }
-
-
-        //(в коллектинг) сортировка тикеров по объему и выборка фикс количества
-
-
-        //(в коллектинг) заполнения карты параметров для создания урла получения массива цен закрытия
-
-        //(тут) вызов метода для получения и (в коллектинг)заполнения данных по всем тикерам
-
-        //
-        return allTickers;
-
     }
 
+    // Оставляет только топ N тикеров по объёму
     private List<DOTMarketData> keepTop(List<DOTMarketData> tickers, int amount) {
-        if (tickers.size() > amount) {
-            return tickers.subList(0, amount);
-        }
-        return tickers;
+        return tickers.size() > amount ? tickers.subList(0, amount) : tickers;
     }
 
+    // Преобразует MarketData в DOTMarketData с упрощением структуры
     private List<DOTMarketData> pullVol(List<MarketData> tickers) {
-
-        List<DOTMarketData> tickersVol = tickers.stream()
-                .map(data -> new DOTMarketData(
-                        data.symbol(),
-                        data.vol()
-                ))
+        return tickers.stream()
+                .map(data -> new DOTMarketData(data.symbol(), data.vol()))
                 .collect(Collectors.toList());
-        return tickersVol;
     }
 
-    private  List<Ticker> getCandles(List<DOTMarketData> tickers, List<String> timeframes, int candles) {
-         List<Ticker> allTickers = new ArrayList<>();
-         Map<String, String> parameters = new HashMap<>();
-         LinkedList<Double> closePrices = new LinkedList<>();
+    // Генерирует данные свечей (candles) для тикеров по всем таймфреймам
+    private List<Ticker> getCandles(List<DOTMarketData> tickers, List<String> timeframes, int candles) {
+        List<Ticker> allTickers = new ArrayList<>();
 
-         String candlesamount = String.valueOf(candles);
-         // перебор всех тикеров и таймфреймов для них
-         for (DOTMarketData ticker : tickers) {
-             for (String timeframe : timeframes) {
+        for (DOTMarketData ticker : tickers) {
+            for (String timeframe : timeframes) {
+                try {
+                    // Параметры запроса к API
+                    Map<String, String> parameters = Map.of(
+                            "period", timeframe,
+                            "size", String.valueOf(candles),
+                            "symbol", ticker.symbol()
+                    );
 
-                 //Input parameters
-                 parameters.put("period", timeframe);
-                 parameters.put("size", candlesamount);
-                 parameters.put("symbol", ticker.symbol());
+                    // Получаем данные свечей через API
+                    var klineData = huobiApi.getKlines(parameters);
+                    LinkedList<Double> closePrices = new LinkedList<>(klineData.stream()
+                            .map(Kline::close)
+                            .collect(Collectors.toList()));
 
-                 try {
-                     var allkliens = huobiApi.getKlines(parameters);
-                     long lastTimestamp = (long) allkliens.get(allkliens.size() - 1).id() * 1000; // Берём ID последней свечи
-                     closePrices = new LinkedList<>(allkliens.stream()
-                             .map(Kline::close)
-                             .collect(Collectors.toList()));
+                    long lastTimestamp = (long) klineData.get(klineData.size() - 1).id() * 1000;
+                    allTickers.add(new Ticker(ticker.symbol(), timeframe, closePrices, lastTimestamp, false, false));
 
-                     allTickers.add(new Ticker(ticker.symbol(), timeframe, closePrices, lastTimestamp, false, false));
+                    // Настраиваем WebSocket для обновлений данных
+                    huobiApiWebsocket.updateCandlestick(
+                            ticker.symbol(),
+                            timeframe,
+                            this::handleNewCandlestick // Передаём метод handleNewCandlestick напрямую
+                    );
 
-                 } catch (IOException | URISyntaxException e) {
-                     throw new RuntimeException(e);
-                 }
 
-                 parameters.clear();
+                } catch (IOException | URISyntaxException e) {
+                    System.err.println("Ошибка получения свечей для тикера: " + ticker.symbol());
+                    e.printStackTrace();
+                }
+            }
+        }
 
-                 try {
-                     var websocketupdate = huobiApiWebsocket.updateCandlestick(ticker.symbol(), timeframe, dataCollecting);
-                     System.out.println(websocketupdate);
-
-                 } catch (RuntimeException e){
-
-                     System.err.println("Ошибка при выполнении updateCandlestick: " + e.getMessage());
-                     e.printStackTrace();
-                 }
-             }
-         }
-         return allTickers;
+        return allTickers;
     }
 
-    public void handleNewCandlestick(Kline kline, String channel, long timestamp) {
+
+    // Обрабатывает обновления данных через WebSocket
+    private void handleNewCandlestick(Kline kline, String channel, long timestamp) {
         String[] parts = channel.split("\\.");
-
-        // Извлекаем символ и таймфрейм
         String symbol = parts[1];
         String timeframe = parts[3];
-        long ts = timestamp;
 
-        Ticker ticker = data.findTicker(symbol, timeframe);
+        // Находим тикер в репозитории
+        Ticker ticker = tickerRepository.findTicker(symbol, timeframe);
         if (ticker != null) {
-            // Приведение lastTimestamp в миллисекунды
+            // Проверяем, нужно ли обновлять данные тикера
             long adjustedTimestamp = ticker.lastTimestamp() * 1000 + candleFilter.getIntervalDuration(timeframe);
 
-            // Логирование для отладки
-            System.out.println("Received ts: " + ts);
-            System.out.println("Ticker lastTimestamp (ms): " + ticker.lastTimestamp() * 1000);
-            System.out.println("Calculated adjustedTimestamp: " + adjustedTimestamp);
-
-            // Сравнение таймстампов
-            if (ts > adjustedTimestamp) {
+            if (timestamp > adjustedTimestamp) {
                 ticker.addClosePrice(kline.close(), dataConfig.getCandlesAmount());
-
-                // Обновление lastTimestamp в секундах
                 Ticker updatedTicker = new Ticker(
-                        symbol,
-                        timeframe,
-                        ticker.close(),
-                        ts / 1000,
-                        ticker.SMAsignal(),
-                        ticker.MACDsignal()
-                        );
-                data.updateTicker(updatedTicker);
-
-                System.out.println("Данные тикера обновлены: " + symbol + " (" + timeframe + ")");
+                        symbol, timeframe, ticker.close(), timestamp / 1000, ticker.SMAsignal(), ticker.MACDsignal()
+                );
+                tickerRepository.updateTicker(updatedTicker);
+                System.out.println("Тикер обновлён: " + symbol + " (" + timeframe + ")");
             } else {
                 System.out.println("Старые данные, обновление не требуется.");
             }
         } else {
-            System.err.println("Тикер не найден для символа: " + symbol + " и таймфрейма: " + timeframe);
+            System.err.println("Тикер не найден: " + symbol + " и таймфрейм: " + timeframe);
         }
     }
 }

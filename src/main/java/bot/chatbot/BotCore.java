@@ -1,35 +1,28 @@
 package bot.chatbot;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.requests.GatewayIntent;
+
 
 public class BotCore {
-    private static JDA jda;
+    private final JDA jda;
     private final BotListener botListener;
 
-    public BotCore(String token) {
-        BotListener tempListener = null;
-        try {
-            jda = JDABuilder.createDefault(token)
-                    .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
-                    .build();
+    public BotCore(JDA jda, BotListener botListener) {
+        this.botListener = botListener;
+        this.jda = jda;
 
-            tempListener = new BotListener(jda); // Создаём Listener
-            jda.addEventListener(tempListener);
+        if (this.jda == null) {
+            throw new IllegalArgumentException("JDA can't be null");
+        }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.botListener = tempListener; // Присваиваем финальной переменной
-        if (this.botListener == null) {
-            throw new IllegalStateException("Failed to initialize BotListener");
-        }
+        this.jda.addEventListener(botListener);
+
     }
 
-    public BotListener getBotListener() {
-        return botListener;
+    public JDA getJDA() {
+        return jda;
     }
+
 }
 
 

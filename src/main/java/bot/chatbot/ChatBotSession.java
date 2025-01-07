@@ -18,7 +18,6 @@ public class ChatBotSession {
         this.currentStatus = new Status("INACTIVE"); // Начальный статус
     }
 
-
     // Метод для обработки команд
     public void processCommand(String commandText) {
         if (!isItCommand(commandText)) {

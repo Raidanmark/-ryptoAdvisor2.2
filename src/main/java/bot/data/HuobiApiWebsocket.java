@@ -9,6 +9,7 @@ import com.huobi.constant.HuobiOptions;
 import com.huobi.constant.enums.CandlestickIntervalEnum;
 
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 public class HuobiApiWebsocket {
     private final ObjectMapper objectMapper;
@@ -18,29 +19,23 @@ public class HuobiApiWebsocket {
         this.objectMapper = objectMapper;
     }
 
-    public <T> T updateCandlestick(String symbol, String timeframe, DataCollecting dataCollecting) {
-        this.dataCollecting = dataCollecting;
-        // Поиск значения enum по code через Stream
-        CandlestickIntervalEnum enumtimeframe =
-                Arrays.stream(CandlestickIntervalEnum.values())
-                        .filter(e -> e.getCode().equals(timeframe))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid timeframe: " + timeframe));
+    public void updateCandlestick(String symbol, String timeframe, CandlestickHandler handler) {
+        MarketClient marketClient = MarketClient.create(new HuobiOptions());
+        CandlestickIntervalEnum enumtimeframe = Arrays.stream(CandlestickIntervalEnum.values())
+                .filter(e -> e.getCode().equals(timeframe))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid timeframe: " + timeframe));
 
-             MarketClient marketClient = MarketClient.create(new HuobiOptions());
-             marketClient.subCandlestick(SubCandlestickRequest.builder()
-             .symbol(symbol)
-             .interval(enumtimeframe)
-             .build(), (candlestick) -> {
-
-             WebSocketMessage message = objectMapper.convertValue(candlestick, WebSocketMessage.class);
-             String channel = message.ch();// "market.ethbtc.kline.1min"
-             long timestamp = message.ts();
-             Kline kline = message.candlestick();  // Данные свечи
-             dataCollecting.handleNewCandlestick(kline, channel, timestamp);
-             //Kline kline  = objectMapper.convertValue(candlestick, Kline.class);
-             System.out.println(" свеча: " + candlestick.toString());
+        marketClient.subCandlestick(SubCandlestickRequest.builder()
+                .symbol(symbol)
+                .interval(enumtimeframe)
+                .build(), (candlestick) -> {
+            WebSocketMessage message = objectMapper.convertValue(candlestick, WebSocketMessage.class);
+            Kline kline = message.candlestick();
+            String channel = message.ch();
+            long timestamp = message.ts();
+            handler.onNewCandlestick(kline, channel, timestamp); // Вызываем через CandlestickHandler
         });
-        return null;
     }
+
 }

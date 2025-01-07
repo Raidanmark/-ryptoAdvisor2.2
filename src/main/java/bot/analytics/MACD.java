@@ -8,16 +8,18 @@ import java.util.List;
 
 import static bot.data.DataConfig.*;
 
-public class MACD {
-    Data data;
-    BotListener listener;
+public class MACD implements Analyzer {
+    private final Data data;
+    private final BotListener listener;
 
     public MACD(Data data, BotListener listener) {
         this.data = data;
         this.listener = listener;
     }
+
     // Метод для анализа сигнала MACD
-    public void analyzeMACDSignal(Ticker ticker) {
+    @Override
+    public void analyze(Ticker ticker) {
         // Получаем список цен закрытия
         List<Double> closePrices = ticker.close();
 
@@ -42,7 +44,6 @@ public class MACD {
                 );
                 data.updateTicker(updatedTicker);
 
-                messageMacdTest();
             } else { }
         } else {
 
@@ -95,7 +96,5 @@ public class MACD {
         return ema;
     }
 
-    public void messageMacdTest() {
-        listener.broadcastMessage("Тest MACD signal: BUY");
-    }
+
 }
