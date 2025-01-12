@@ -15,7 +15,7 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) {
+        if (shouldIgnore(event)) {
             return;
         }
 
@@ -25,16 +25,23 @@ public class BotListener extends ListenerAdapter {
         log("[Message Received] Chat ID: " + chatId + ", Message: " + message);
 
         try {
-            MessageSender messageSender = new JDAMessageSender(event.getChannel());
-            ChatBotSession session = chatSessions.computeIfAbsent(chatId, id -> {
-                log("[New Session] Creating session for chat ID: " + chatId);
-                return new ChatBotSession(messageSender);
-            });
-
+            ChatBotSession session = getOrCreateSession(chatId, event);
             session.processCommand(message);
         } catch (Exception e) {
             logError("Error processing message: " + message, e);
         }
+    }
+
+    private boolean shouldIgnore(MessageReceivedEvent event) {
+        return event.getAuthor().isBot();
+    }
+
+    private ChatBotSession getOrCreateSession(String chatId, MessageReceivedEvent event) {
+        return chatSessions.computeIfAbsent(chatId, id -> {
+            log("Creating new session for chat ID: " + chatId);
+            MessageSender messageSender = new JDAMessageSender(event.getChannel());
+            return new ChatBotSession(messageSender);
+        });
     }
 
     public void broadcastMessage(String message) {

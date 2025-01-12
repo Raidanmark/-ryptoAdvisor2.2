@@ -5,7 +5,7 @@ import bot.status.Status;
 
 import static bot.commands.CommandResponse.STOP_COMMAND_MESSAGE;
 
-public class StopCommand implements Command {
+public class StopCommand extends BaseCommand {
 
     @Override
     public String getName() {

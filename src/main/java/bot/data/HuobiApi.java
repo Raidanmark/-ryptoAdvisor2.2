@@ -5,6 +5,7 @@ import bot.data.model.Kline;
 import bot.data.model.MarketData;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.Api;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
@@ -20,7 +21,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-public class HuobiApi {
+
+public class HuobiApi implements ApiClient {
     private static final String APPLICATION_JSON = "application/json";
     private static final String BASE_URL = "https://api.huobi.pro";
     private final CloseableHttpClient client;
@@ -45,7 +47,7 @@ public class HuobiApi {
         return makeAPICall(endpoint, parameters, typeReference);
     }
 
-    private <T> T makeAPICall(String endpoint, Map<String, String> parameters, TypeReference<ApiResponse<T>> typeReference) throws IOException, URISyntaxException {
+    protected  <T> T makeAPICall(String endpoint, Map<String, String> parameters, TypeReference<ApiResponse<T>> typeReference) throws IOException, URISyntaxException {
         List<NameValuePair> callParameters = parameters.entrySet()
                 .stream()
                 .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))

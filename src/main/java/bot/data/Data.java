@@ -3,10 +3,7 @@ package bot.data;
 
 import bot.analytics.TickerAnalyzer;
 import bot.data.model.Ticker;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+
 
 
 import java.util.List;

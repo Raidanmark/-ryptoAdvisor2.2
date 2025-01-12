@@ -72,9 +72,15 @@ public class AppConfig {
         return new DataConfig();
     }
 
+    private ApiClient createApiClient() {
+        return new HuobiApi(createHttpClient(), createObjectMapper());
+    }
+
+    private Websocket createWebsocket() {
+        return new HuobiApiWebsocket(createObjectMapper());
+    }
+
     public DataCollecting createDataCollecting(TickerRepository tickerRepository) {
-        HuobiApi huobiApi = new HuobiApi(createHttpClient(), createObjectMapper());
-        HuobiApiWebsocket huobiApiWebsocket =  new HuobiApiWebsocket(createObjectMapper());
-        return new DataCollecting(huobiApi, huobiApiWebsocket, tickerRepository, createDataConfig(), createCandleFilter());
+        return new DataCollecting(createApiClient(), createWebsocket(), tickerRepository, createDataConfig(), createCandleFilter());
     }
 }
