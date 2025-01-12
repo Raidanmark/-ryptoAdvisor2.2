@@ -1,30 +1,36 @@
 package bot.status;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Status {
     private final String name;
-    private final Set<String> availableCommands;
 
     public Status(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Status name cannot be null or empty");
+        }
         this.name = name;
-        this.availableCommands = new HashSet<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<String> getAvailableCommands() {
-        return availableCommands;
+    @Override
+    public String toString() {
+        return "Status{" +
+                "name='" + name + '\'' +
+                '}';
     }
 
-    public void addCommand(String commandName) {
-        availableCommands.add(commandName);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Status status = (Status) o;
+        return name.equals(status.name);
     }
 
-    public boolean isCommandAvailable(String commandName) {
-        return availableCommands.contains(commandName);
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }

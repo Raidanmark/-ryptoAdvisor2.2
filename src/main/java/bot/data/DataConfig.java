@@ -14,7 +14,7 @@ public class DataConfig {
 
     public DataConfig() {
         timeframes = Arrays.asList("5min","4hour");
-        AmountOfCryptocurrency = 3;
+        AmountOfCryptocurrency = 2;
         CandlesAmount = 40;
         macdShortPeriod = 12;
         macdLongPeriod = 26;

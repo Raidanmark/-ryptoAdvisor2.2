@@ -6,7 +6,7 @@ import bot.status.Status;
 import static bot.commands.CommandResponse.HELP_COMMAND_MESSAGE_ACTIVE;
 import static bot.commands.CommandResponse.HELP_COMMAND_MESSAGE_INACTIVE;
 
-public class HelpCommand implements Command {
+public class HelpCommand extends BaseCommand {
 
     @Override
     public String getName() {

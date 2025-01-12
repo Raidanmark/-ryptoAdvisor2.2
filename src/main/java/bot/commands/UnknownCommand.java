@@ -5,7 +5,7 @@ import bot.status.Status;
 
 import static bot.commands.CommandResponse.UNKNOWN_COMMAND_MESSAGE;
 
-public class UnknownCommand implements Command {
+public class UnknownCommand extends BaseCommand {
 
     @Override
     public String getName() {

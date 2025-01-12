@@ -18,37 +18,55 @@ public class ChatBotSession {
         this.currentStatus = new Status("INACTIVE"); // Начальный статус
     }
 
-
     // Метод для обработки команд
     public void processCommand(String commandText) {
-        if (!isItCommand(commandText)) {
+        if (!isCommand(commandText)) {
+            handleNonCommandMessage(commandText);
             return;
         }
-
 
         Command command = commandRegistry.getCommand(commandText);
-// Проверка доступности команды в текущем статусе
-        if (!command.isAvailableInStatus(currentStatus)) {
-            messageSender.sendMessage("Command <" + commandText + "> is not available in status ");
+        if (!isCommandAvailable(command)) {
+            handleUnavailableCommand(commandText);
             return;
         }
 
-        // Выполняем команду
-        CommandContext context = new CommandContext(messageSender, currentStatus);
-        command.execute(context);
-
-        // Обновляем текущий статус, если команда меняет статус
-        Status newStatus = command.getNewStatus();
-        if (newStatus != null) {
-            currentStatus = newStatus;
-        }
-
+        executeCommand(command);
     }
 
 
-    private boolean isItCommand (String commandText)
-    {
+    private boolean isCommand(String commandText) {
         return commandText.startsWith("!");
+    }
+
+    private void handleNonCommandMessage(String message) {
+        log("Received non-command message: " + message);
+    }
+
+    private boolean isCommandAvailable(Command command) {
+        return command != null && command.isAvailableInStatus(currentStatus);
+    }
+
+    private void handleUnavailableCommand(String commandText) {
+        messageSender.sendMessage("Command <" + commandText + "> is not available in the current status.");
+    }
+
+    private void executeCommand(Command command) {
+        try {
+            CommandContext context = new CommandContext(messageSender, currentStatus);
+            command.execute(context);
+            updateStatus(command);
+        } catch (Exception e) {
+            logError("Error executing command: " + command.getName(), e);
+        }
+    }
+
+    private void updateStatus(Command command) {
+        Status newStatus = command.getNewStatus();
+        if (newStatus != null) {
+            log("Updating status from " + currentStatus.getName() + " to " + newStatus.getName());
+            currentStatus = newStatus;
+        }
     }
 
     public Status getCurrentStatus() {
@@ -57,6 +75,15 @@ public class ChatBotSession {
 
     public MessageSender getMessageSender() {
         return messageSender;
+    }
+
+    private void log(String message) {
+        System.out.println("[ChatBotSession] " + message);
+    }
+
+    private void logError(String message, Throwable e) {
+        System.err.println("[ChatBotSession] " + message);
+        e.printStackTrace();
     }
 
 
