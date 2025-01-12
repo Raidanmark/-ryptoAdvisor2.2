@@ -18,12 +18,12 @@ public class TickerAnalyzer {
         }
     }
 
-    private void analyzeMACD(Ticker ticker) {
+    protected void analyzeMACD(Ticker ticker) {
         // Логика анализа MACD
         System.out.println("Analyzing MACD for: " + ticker.symbol());
     }
 
-    private void analyzeSMA(Ticker ticker) {
+    protected void analyzeSMA(Ticker ticker) {
         // Логика анализа SMA
         System.out.println("Analyzing SMA for: " + ticker.symbol());
     }
