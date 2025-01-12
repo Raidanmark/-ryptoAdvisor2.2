@@ -2,19 +2,34 @@ package bot.analytics;
 
 import bot.data.model.Ticker;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TickerAnalyzer {
-    private final List<Analyzer> analyzers = new ArrayList<>();
-
-    public void addAnalyzer(Analyzer analyzer) {
-        analyzers.add(analyzer);
-    }
 
     public void analyzeTicker(Ticker ticker) {
-        for (Analyzer analyzer : analyzers) {
-            analyzer.analyze(ticker);
+        try {
+            analyzeMACD(ticker);
+        } catch (Exception e) {
+            logError("Error analyzing MACD for ticker: " + ticker.symbol(), e);
         }
+
+        try {
+            analyzeSMA(ticker);
+        } catch (Exception e) {
+            logError("Error analyzing SMA for ticker: " + ticker.symbol(), e);
+        }
+    }
+
+    private void analyzeMACD(Ticker ticker) {
+        // Логика анализа MACD
+        System.out.println("Analyzing MACD for: " + ticker.symbol());
+    }
+
+    private void analyzeSMA(Ticker ticker) {
+        // Логика анализа SMA
+        System.out.println("Analyzing SMA for: " + ticker.symbol());
+    }
+
+    private void logError(String message, Throwable e) {
+        System.err.println("[TickerAnalyzer] " + message);
+        e.printStackTrace();
     }
 }
