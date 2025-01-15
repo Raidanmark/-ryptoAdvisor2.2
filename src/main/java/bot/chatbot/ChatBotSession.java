@@ -12,9 +12,9 @@ public class ChatBotSession {
     private final MessageSender messageSender;
     private final CommandRegistry commandRegistry;
 
-    public ChatBotSession(MessageSender messageSender) {
+    public ChatBotSession(MessageSender messageSender, CommandRegistry commandRegistry) {
         this.messageSender = messageSender;
-        this.commandRegistry = new CommandRegistry();
+        this.commandRegistry = commandRegistry;
         this.currentStatus = new Status("INACTIVE"); // Начальный статус
     }
 

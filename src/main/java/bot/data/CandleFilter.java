@@ -1,7 +1,7 @@
 package bot.data;
 
 public class CandleFilter {
-    public static long getIntervalDuration(String interval) {
+    public long getIntervalDuration(String interval) {
         switch (interval.toLowerCase()) {
             case "1min":
                 return 60 * 1000L; // 1 минута

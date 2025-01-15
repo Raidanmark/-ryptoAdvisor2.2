@@ -13,8 +13,8 @@ public class DataConfig {
     private static int macdSignalPeriod;
 
     public DataConfig() {
-        timeframes = Arrays.asList("5min","4hour");
-        AmountOfCryptocurrency = 2;
+        timeframes = Arrays.asList("5min","1min");
+        AmountOfCryptocurrency = 5;
         CandlesAmount = 40;
         macdShortPeriod = 12;
         macdLongPeriod = 26;
@@ -29,7 +29,7 @@ public class DataConfig {
         return AmountOfCryptocurrency;
     }
 
-    public static int getCandlesAmount() {
+    public int getCandlesAmount() {
         return CandlesAmount;
     }
 

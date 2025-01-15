@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import bot.analytics.TickerAnalyzer;
 import bot.data.model.*;
 
 public class DataCollecting {
@@ -14,12 +15,14 @@ public class DataCollecting {
     private final DataConfig dataConfig;
     private final CandleFilter candleFilter;
 
+
     public DataCollecting(ApiClient apiClient, Websocket websocket, TickerRepository tickerRepository, DataConfig dataConfig, CandleFilter candleFilter) {
         this.apiClient = apiClient;
         this.websocket = websocket;
         this.tickerRepository = tickerRepository;
         this.dataConfig = dataConfig;
         this.candleFilter = candleFilter;
+
     }
 
     public List<Ticker> start() {
@@ -62,6 +65,7 @@ public class DataCollecting {
         }
         return allTickers;
     }
+
     private List<Kline> fetchKlines(DOTMarketData ticker, String timeframe) throws IOException, URISyntaxException {
         Map<String, String> parameters = Map.of(
                 "period", timeframe,
@@ -81,13 +85,13 @@ public class DataCollecting {
                 .map(Kline::close)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        long lastTimestamp = (long) klineData.get(klineData.size() - 1).id() * 1000;
+        long lastTimestamp =  System.currentTimeMillis();;
         return new Ticker(ticker.symbol(), timeframe, closePrices, lastTimestamp, false, false);
     }
 
 
     // Обрабатывает обновления данных через WebSocket
-    private void handleNewCandlestick(Kline kline, String channel, long timestamp) {
+    protected void handleNewCandlestick(Kline kline, String channel, long timestamp) {
         String[] parts = channel.split("\\.");
         String symbol = parts[1];
         String timeframe = parts[3];
@@ -96,15 +100,18 @@ public class DataCollecting {
         Ticker ticker = tickerRepository.findTicker(symbol, timeframe);
         if (ticker != null) {
             // Проверяем, нужно ли обновлять данные тикера
-            long adjustedTimestamp = ticker.lastTimestamp() * 1000 + candleFilter.getIntervalDuration(timeframe);
+            long adjustedTimestamp = ticker.lastTimestamp() + candleFilter.getIntervalDuration(timeframe);
 
             if (timestamp > adjustedTimestamp) {
                 ticker.addClosePrice(kline.close(), dataConfig.getCandlesAmount());
                 Ticker updatedTicker = new Ticker(
-                        symbol, timeframe, ticker.close(), timestamp / 1000, ticker.SMAsignal(), ticker.MACDsignal()
+                        symbol, timeframe, ticker.close(), timestamp, ticker.SMAsignal(), ticker.MACDsignal()
                 );
                 tickerRepository.updateTicker(updatedTicker);
+                tickerRepository.analyzeUpdatedTicker(updatedTicker);
+
                 System.out.println("Тикер обновлён: " + symbol + " (" + timeframe + ")");
+
             } else {
                 System.out.println("Старые данные, обновление не требуется.");
             }
