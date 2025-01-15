@@ -1,5 +1,7 @@
 package bot.chatbot;
 
+import bot.commands.CommandRegistry;
+import bot.data.TickerRepository;
 import bot.messages.JDAMessageSender;
 import bot.messages.MessageSender;
 import net.dv8tion.jda.api.JDA;
@@ -12,6 +14,11 @@ import java.util.Map;
 
 public class BotListener extends ListenerAdapter {
     private final Map<String, ChatBotSession> chatSessions = new HashMap<>();
+    private CommandRegistry commandRegistry;
+
+    public BotListener(CommandRegistry commandRegistry) {
+        this.commandRegistry = commandRegistry;
+    }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -40,7 +47,7 @@ public class BotListener extends ListenerAdapter {
         return chatSessions.computeIfAbsent(chatId, id -> {
             log("Creating new session for chat ID: " + chatId);
             MessageSender messageSender = new JDAMessageSender(event.getChannel());
-            return new ChatBotSession(messageSender);
+            return new ChatBotSession(messageSender, commandRegistry);
         });
     }
 
@@ -65,5 +72,6 @@ public class BotListener extends ListenerAdapter {
         System.err.println("[BotListener] " + message);
         e.printStackTrace();
     }
+
 
 }

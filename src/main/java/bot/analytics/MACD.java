@@ -4,6 +4,7 @@ import bot.chatbot.BotListener;
 import bot.data.Data;
 import bot.data.model.Ticker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static bot.data.DataConfig.*;
@@ -34,6 +35,8 @@ public class MACD implements Analyzer {
 
                 listener.broadcastMessage("Ticker: " + ticker.symbol() + " Timeframe: " + ticker.timeframe() + " MACD signal: BUY");
 
+                System.out.println("BUY");
+
                 Ticker updatedTicker = new Ticker(
                         ticker.symbol(),
                         ticker.timeframe(),
@@ -44,12 +47,14 @@ public class MACD implements Analyzer {
                 );
                 data.updateTicker(updatedTicker);
 
-            } else { }
+            } else { System.out.println("BUY"); }
         } else {
 
             if (ticker.MACDsignal() == true) {
 
                 listener.broadcastMessage("Ticker: " + ticker.symbol() + " Timeframe: " + ticker.timeframe() + " MACD signal: SELL");
+
+                System.out.println("SELL");
 
                 Ticker updatedTicker = new Ticker(
                     ticker.symbol(),
@@ -60,7 +65,7 @@ public class MACD implements Analyzer {
                     false
                 );
                 data.updateTicker(updatedTicker);
-            } else { }
+            } else {System.out.println("SELL"); }
 
 
         }
@@ -81,9 +86,28 @@ public class MACD implements Analyzer {
 
     // Метод для вычисления всех значений MACD
     private List<Double> calculateMACDValues(List<Double> prices) {
-        return prices.stream()
-                .map(price -> calculateMACD(prices))
-                .toList();
+        List<Double> shortEMA = calculateEMAValues(prices, getMacdShortPeriod()); // EMA короткого периода
+        List<Double> longEMA = calculateEMAValues(prices, getMacdLongPeriod());  // EMA длинного периода
+        List<Double> macdValues = new ArrayList<>();
+
+        for (int i = 0; i < prices.size(); i++) {
+            macdValues.add(shortEMA.get(i) - longEMA.get(i)); // Разница короткого и длинного EMA
+        }
+        return macdValues;
+    }
+
+    // Метод для вычисления всех значений EMA
+    private List<Double> calculateEMAValues(List<Double> prices, int period) {
+        List<Double> emaValues = new ArrayList<>();
+        double smoothing = 2.0 / (period + 1);
+        double ema = prices.get(0); // Начальное значение EMA
+        emaValues.add(ema);
+
+        for (int i = 1; i < prices.size(); i++) {
+            ema = prices.get(i) * smoothing + ema * (1 - smoothing);
+            emaValues.add(ema);
+        }
+        return emaValues;
     }
 
     // Метод для вычисления EMA

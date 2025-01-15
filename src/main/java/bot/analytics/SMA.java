@@ -32,6 +32,8 @@ public class SMA implements Analyzer{
 
                 listener.broadcastMessage("Ticker: " + ticker.symbol() + " Timeframe: " + ticker.timeframe() + " SMA signal: BUY");
 
+                System.out.println("BUY");
+
                 Ticker updatedTicker = new Ticker(
                         ticker.symbol(),
                         ticker.timeframe(),
@@ -44,11 +46,13 @@ public class SMA implements Analyzer{
 
 
 
-            } else { }
+            } else { System.out.println("BUY");}
         } else {
             if (ticker.SMAsignal() == true) {
 
                 listener.broadcastMessage("Ticker: " + ticker.symbol() + " Timeframe: " + ticker.timeframe() + " SMA signal: SELL");
+
+                System.out.println("SELL");
 
                 Ticker updatedTicker = new Ticker(
                         ticker.symbol(),
@@ -59,7 +63,7 @@ public class SMA implements Analyzer{
                         ticker.MACDsignal()
                 );
                 data.updateTicker(updatedTicker);
-            } else { }
+            } else {  System.out.println("SELL");}
         }
     }
 

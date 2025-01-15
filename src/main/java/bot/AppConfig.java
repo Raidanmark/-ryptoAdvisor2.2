@@ -1,9 +1,13 @@
 package bot;
 
+import bot.analytics.Analyzer;
+import bot.analytics.MACD;
+import bot.analytics.SMA;
 import bot.analytics.TickerAnalyzer;
 import bot.chatbot.BotCore;
 import bot.chatbot.BotListener;
 import bot.chatbot.Config;
+import bot.commands.CommandRegistry;
 import bot.data.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,24 +17,22 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.util.List;
+
 
 public class AppConfig {
     public Config createConfig(){
         return new Config();
     }
 
-    public BotListener createBotListener(){
-        return new BotListener();
-    }
 
-    public BotCore createBotCore(Config config){
+    public BotCore createBotCore(Config config, BotListener botListener){
         String token = config.getDiscordToken();
         if (token == null || token.isEmpty()) {
             throw new IllegalArgumentException("Discord token is missing or empty");
         }
 
         JDA jda = createJDA(token);
-        BotListener botListener = createBotListener();
         return new BotCore(jda, botListener);
     }
 
@@ -44,12 +46,21 @@ public class AppConfig {
         }
     }
 
-    private TickerAnalyzer createTickerAnalyzer(){
-        return new TickerAnalyzer();
+
+    public List<Analyzer> createAnalyzers(Data data, BotListener botListener){
+        return List.of(new MACD(data,botListener), new SMA(data,botListener));
+    }
+
+    public CommandRegistry createCommandRegistry(TickerRepository tickerRepository){
+        return new CommandRegistry(tickerRepository);
+    }
+
+    public TickerAnalyzer createTickerAnalyzer(List<Analyzer> analyzers){
+        return new TickerAnalyzer(analyzers);
     }
 
     public Data createData(TickerRepository tickerRepository, DataCollecting dataCollecting){
-        return new Data(tickerRepository, createTickerAnalyzer(), dataCollecting);
+        return new Data(tickerRepository, dataCollecting);
     }
 
     private ObjectMapper createObjectMapper(){

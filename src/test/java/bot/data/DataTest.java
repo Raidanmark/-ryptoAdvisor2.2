@@ -21,7 +21,7 @@ class DataTest {
         mockRepository = mock(TickerRepository.class);
         mockAnalyzer = mock(TickerAnalyzer.class);
         mockCollecting = mock(DataCollecting.class);
-        data = new Data(mockRepository, mockAnalyzer, mockCollecting);
+        data = new Data(mockRepository, mockCollecting);
     }
 
     @Test

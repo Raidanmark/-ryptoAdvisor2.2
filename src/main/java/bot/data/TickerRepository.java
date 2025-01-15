@@ -1,12 +1,19 @@
 package bot.data;
 
+import bot.analytics.TickerAnalyzer;
 import bot.data.model.Ticker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TickerRepository {
+    private  TickerAnalyzer tickerAnalyzer;
     private final List<Ticker> tickers = new ArrayList<>();
+
+    public void setTickerAnalyzer(TickerAnalyzer tickerAnalyzer) {
+        this.tickerAnalyzer = tickerAnalyzer;
+    }
+
     public void addTickers(List<Ticker> newTickers) {
         tickers.addAll(newTickers);
     }
@@ -31,5 +38,16 @@ public class TickerRepository {
             }
         }
         throw new IllegalArgumentException("Ticker not found: " + updatedTicker.symbol() + " " + updatedTicker.timeframe());
+    }
+
+    public void analyzeAllTickers() {
+        getAllTickers().forEach(ticker -> {
+                tickerAnalyzer.analyzeTicker(ticker);
+        });
+
+    }
+
+    public void analyzeUpdatedTicker(Ticker updatedTicker) {
+        tickerAnalyzer.analyzeTicker(updatedTicker);
     }
 }
